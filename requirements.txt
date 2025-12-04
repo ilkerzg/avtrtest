@@ -1,0 +1,26 @@
+tqdm
+scipy
+
+face_alignment
+numba
+resampy
+soundfile==0.12.1
+
+lpips==0.1.3
+imageio-ffmpeg
+
+transformers
+flask
+flask_sockets
+opencv-python-headless
+aiortc
+aiohttp
+aiohttp_cors
+
+ffmpeg-python
+
+librosa
+openai
+websockets
+pyyaml
+fal-client  # Fal.ai client for TTS, LLM, and other AI services
