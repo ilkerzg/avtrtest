@@ -46,8 +46,8 @@ _conversation_history = {}
 MAX_HISTORY_ROUNDS = 10  # 最多保留10轮对话
 MAX_HISTORY_MESSAGES = MAX_HISTORY_ROUNDS * 2  # 每轮2条消息（user + assistant）
 
-# 系统提示词
-SYSTEM_PROMPT = 'You are a helpful assistant.简单回答用户问题，尽量简洁。回答为text格式，不要markdown格式的。'
+# System prompt - Always respond in English
+SYSTEM_PROMPT = 'You are a friendly and helpful AI assistant. Always respond in English only. Keep your answers concise and conversational. Do not use markdown formatting - respond in plain text only.'
 
 
 def get_conversation_history(session_id):
