@@ -62,7 +62,7 @@ AVATARS:
   avatars:
     - id: "ai_model"
       name: "AI Model"
-      description: "Professional AI model showcasing fashion, elegance, and confidence"
+      description: "Fashion & style advisor"
       avatar_dir: "wav2lip_avatar_female_model"
       image: "/data/wav2lip_avatar_female_model/full_imgs/00000000.png"
       tts_config:
@@ -71,7 +71,7 @@ AVATARS:
     
     - id: "ai_girlfriend"
       name: "AI Companion"
-      description: "Caring AI companion who listens, supports, and is there for you every day"
+      description: "Friendly chat partner"
       avatar_dir: "wav2lip_avatar_long_hair_girl"
       image: "/data/wav2lip_avatar_long_hair_girl/full_imgs/00000000.png"
       tts_config:
@@ -80,7 +80,7 @@ AVATARS:
     
     - id: "ai_assistant"
       name: "AI Assistant"
-      description: "Efficient professional AI assistant helping you solve work and study challenges"
+      description: "Work & productivity helper"
       avatar_dir: "wav2lip_avatar_glass_man"
       image: "/data/wav2lip_avatar_glass_man/full_imgs/00000000.png"
       tts_config:
