@@ -1,5 +1,7 @@
 tqdm
 scipy
+loguru
+six
 
 face_alignment
 numba

@@ -381,7 +381,10 @@ async def post(url, data):
 
 
 if __name__ == '__main__':
-    mp.set_start_method('spawn')
+    try:
+        mp.set_start_method('spawn')
+    except RuntimeError:
+        pass  # Context already set
     parser = argparse.ArgumentParser()
 
     # audio FPS
