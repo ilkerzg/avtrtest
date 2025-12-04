@@ -10,7 +10,7 @@ import torch.multiprocessing as mp
 from aiohttp import web
 import aiohttp
 import aiohttp_cors
-from aiortc import RTCPeerConnection, RTCSessionDescription, RTCConfiguration
+from aiortc import RTCPeerConnection, RTCSessionDescription, RTCConfiguration, RTCIceServer
 from aiortc.rtcrtpsender import RTCRtpSender
 
 import argparse
@@ -157,7 +157,11 @@ async def offer(request):
     nerfreal = LipReal(temp_opt, model, session_avatar)
     nerfreals[sessionid] = nerfreal
     pc = RTCPeerConnection(configuration=RTCConfiguration(
-        iceServers=[],
+        iceServers=[
+            RTCIceServer(urls=["stun:stun.l.google.com:19302"]),
+            RTCIceServer(urls=["stun:stun1.l.google.com:19302"]),
+            RTCIceServer(urls=["stun:stun2.l.google.com:19302"]),
+        ],
     ))
     pcs.add(pc)
 

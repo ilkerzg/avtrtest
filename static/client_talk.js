@@ -118,7 +118,11 @@ class AvatarClient {
             // Create RTCPeerConnection
             this.pc = new RTCPeerConnection({
                 sdpSemantics: 'unified-plan',
-                iceServers: []
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' }
+                ]
             });
 
             // Listen for remote video stream
