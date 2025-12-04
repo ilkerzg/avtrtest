@@ -1,20 +1,20 @@
 LLM:
   LLM_API_KEY: "xxx"
   LLM_BASE_URL: "https://dashscope.aliyuncs.com/compatible-mode/v1"
-  LLM_MODEL_NAME: "qwen-plus"  # 可选: qwen-plus, qwen-max, qwen-turbo, gpt-4, gpt-3.5-turbo 等
+  LLM_MODEL_NAME: "qwen-plus"  # Options: qwen-plus, qwen-max, qwen-turbo, gpt-4, gpt-3.5-turbo, etc.
 
 TTS:
   DOUBAO_APPID: "xxx"
   DOUBAO_TOKEN: "xxx"
 
-# Fal.ai 配置 (用于 TTS, LLM, ASR 等)
+# Fal.ai Configuration (for TTS, LLM, ASR, etc.)
 FAL:
-  FAL_API_KEY: "xxx"  # 从 https://fal.ai/dashboard/keys 获取
-  # TTS 配置
-  FAL_TTS_MODEL: "kokoro"  # 可选: kokoro (快速), xtts (支持中文+语音克隆), f5-tts (高质量), mars5-tts
-  FAL_TTS_VOICE: "af_heart"  # kokoro 语音: af_heart, af_bella, af_nicole, am_adam, am_michael 等
-  # LLM 配置 (如果使用 fal.ai LLM)
-  FAL_LLM_MODEL: "google/gemini-2.5-flash"  # 可选: anthropic/claude-3.5-sonnet, openai/gpt-4o, deepseek/deepseek-r1 等
+  FAL_API_KEY: "xxx"  # Get from https://fal.ai/dashboard/keys
+  # TTS Configuration
+  FAL_TTS_MODEL: "kokoro"  # Options: kokoro (fast), xtts (Chinese + voice cloning), f5-tts (high quality), mars5-tts
+  FAL_TTS_VOICE: "af_heart"  # kokoro voices: af_heart, af_bella, af_nicole, am_adam, am_michael, etc.
+  # LLM Configuration (if using fal.ai LLM)
+  FAL_LLM_MODEL: "google/gemini-2.5-flash"  # Options: anthropic/claude-3.5-sonnet, openai/gpt-4o, deepseek/deepseek-r1, etc.
 
 DOWNLOAD:
   BASE_URL: "https://huggingface.co/shibing624/ai-avatar-wav2lip/resolve/main"
@@ -23,56 +23,56 @@ DOWNLOAD:
     wav2lip.pth:
       path: "./models/wav2lip.pth"
       size: "215 MB"
-      description: "Wav2Lip256 唇形同步生成模型"
+      description: "Wav2Lip256 lip-sync generation model"
   
   AVATARS:
     wav2lip_avatar_female_model:
       url_suffix: "wav2lip_avatar_female_model.zip"
       path: "./data/wav2lip_avatar_female_model.zip"
       size: "353 MB"
-      description: "女性数字人形象(含预处理人脸图片)"
+      description: "Female digital avatar (with preprocessed face images)"
     
     wav2lip_avatar_glass_man:
       url_suffix: "wav2lip_avatar_glass_man.zip"
       path: "./data/wav2lip_avatar_glass_man.zip"
       size: "88.4 MB"
-      description: "戴眼镜男性数字人形象"
+      description: "Male digital avatar with glasses"
     
     wav2lip_avatar_long_hair_girl:
       url_suffix: "wav2lip_avatar_long_hair_girl.zip"
       path: "./data/wav2lip_avatar_long_hair_girl.zip"
       size: "153 MB"
-      description: "长发女性数字人形象"
+      description: "Long-haired female digital avatar"
 
-# 数字人配置
+# Avatar Configuration
 AVATARS:
   default_avatar: "ai_model"
   
   avatars:
     - id: "ai_model"
-      name: "AI 模特"
-      description: "专业的AI模特，展示时尚、优雅与自信"
+      name: "AI Model"
+      description: "Professional AI model showcasing fashion, elegance, and confidence"
       avatar_dir: "wav2lip_avatar_female_model"
       image: "/data/wav2lip_avatar_female_model/full_imgs/00000000.png"
       tts_config:
-        type: "doubao"
-        voice: "zh_female_sajiaonvyou_moon_bigtts"
+        type: "fal"
+        voice: "af_heart"
     
     - id: "ai_girlfriend"
-      name: "AI 女友"
-      description: "温柔体贴的AI女友，倾听、关心、陪伴你的每一天"
+      name: "AI Companion"
+      description: "Caring AI companion who listens, supports, and is there for you every day"
       avatar_dir: "wav2lip_avatar_long_hair_girl"
       image: "/data/wav2lip_avatar_long_hair_girl/full_imgs/00000000.png"
       tts_config:
-        type: "doubao"
-        voice: "zh_female_tianmeixiaoyuan_moon_bigtts" 
+        type: "fal"
+        voice: "af_bella"
     
     - id: "ai_assistant"
-      name: "AI 助手"
-      description: "高效专业的AI助手，帮助你解决工作和学习中的各种问题"
+      name: "AI Assistant"
+      description: "Efficient professional AI assistant helping you solve work and study challenges"
       avatar_dir: "wav2lip_avatar_glass_man"
       image: "/data/wav2lip_avatar_glass_man/full_imgs/00000000.png"
       tts_config:
-        type: "doubao"
-        voice: "ICL_zh_male_hanhoudunshi_tob"
+        type: "fal"
+        voice: "am_adam"
 

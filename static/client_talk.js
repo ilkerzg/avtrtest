@@ -1,62 +1,62 @@
 /**
- * AI Avatar WebRTC 客户端 - Talk 页面版本
+ * AI Avatar WebRTC Client - Talk Page Version
  */
 
 class AvatarClient {
     constructor() {
-        // WebRTC 相关
+        // WebRTC related
         this.pc = null;
         this.dataChannel = null;
         this.mediaRecorder = null;
         this.audioChunks = [];
         this.recognition = null;
         
-        // 状态管理
+        // State management
         this.isConnected = false;
         this.isRecording = false;
         this.isSpeaking = false;
         this.sessionid = 0;
-        this.subtitleEnabled = true;  // 字幕开关状态
-        this.subtitleTimer = null;  // 字幕隐藏定时器
-        this.currentSubtitle = '';  // 当前显示的字幕文本
+        this.subtitleEnabled = true;  // Subtitle toggle state
+        this.subtitleTimer = null;  // Subtitle hide timer
+        this.currentSubtitle = '';  // Current subtitle text
         
-        // DOM 元素
+        // DOM elements
         this.remoteVideo = document.getElementById('remoteVideo');
         this.loadingOverlay = document.getElementById('loadingOverlay');
         this.subtitleOverlay = document.getElementById('subtitleOverlay');
         
-        // 获取URL参数
+        // Get URL parameters
         this.avatarId = this.getUrlParam('avatar') || 'ai_model';
-        this.avatarName = 'AI Avatar';  // 默认名称，稍后从配置获取
-        this.avatarImage = '';  // avatar图片路径
+        this.avatarName = 'AI Avatar';  // Default name, will be updated from config
+        this.avatarImage = '';  // Avatar image path
         
-        // 初始化
+        // Initialize
         this.init();
     }
 
     async init() {
         try {
-            // 从API获取avatar配置
+            // Load avatar config from API
             await this.loadAvatarConfig();
             
-            // 设置页面标题
-            document.title = `与${this.avatarName}对话`;
+            // Set page title
+            document.title = `Chat with ${this.avatarName}`;
             
-            // 隐藏所有控制按钮（calling状态）
+            // Hide all control buttons (calling state)
             this.hideControlButtons();
             
-            // 连接WebRTC
+            // Connect WebRTC
             await this.connect();
             
-            // 设置语音识别 - 参考index.html
+            // Setup speech recognition
             this.setupSpeechRecognition();
             
-            // 设置按住说话 - 参考index.html
+            // Setup push to talk
             this.setupPushToTalk();
             
         } catch (error) {
-            console.error('初始化失败:', error);
-            this.showError('初始化失败，请刷新页面重试');
+            console.error('Initialization failed:', error);
+            this.showError('Initialization failed, please refresh the page');
         }
     }
 
@@ -67,7 +67,7 @@ class AvatarClient {
 
     async loadAvatarConfig() {
         try {
-            // 从API获取avatar配置
+            // Load avatar config from API
             const response = await fetch('/api/avatars');
             const result = await response.json();
             
@@ -76,28 +76,28 @@ class AvatarClient {
                 if (avatarConfig) {
                     this.avatarName = avatarConfig.name;
                     this.avatarImage = avatarConfig.image;
-                    console.log(`Avatar配置加载成功: ${this.avatarName}, 图片: ${this.avatarImage}`);
+                    console.log(`Avatar config loaded: ${this.avatarName}, image: ${this.avatarImage}`);
                     
-                    // 设置加载背景图和图标
+                    // Set loading background and icon
                     this.setLoadingBackground();
                 } else {
-                    console.warn(`未找到avatar配置: ${this.avatarId}`);
+                    console.warn(`Avatar config not found: ${this.avatarId}`);
                 }
             }
         } catch (error) {
-            console.error('加载avatar配置失败:', error);
+            console.error('Failed to load avatar config:', error);
         }
     }
 
     setLoadingBackground() {
         if (this.avatarImage) {
-            // 设置加载遮罩的背景图（使用独立的背景层）
+            // Set loading overlay background image (using separate background layer)
             const loadingBg = document.getElementById('loadingBackground');
             if (loadingBg) {
                 loadingBg.style.backgroundImage = `url(${this.avatarImage})`;
             }
             
-            // 设置加载图标为avatar头像
+            // Set loading icon to avatar image
             const loadingIcon = document.getElementById('loadingIcon');
             if (loadingIcon) {
                 loadingIcon.innerHTML = `<img src="${this.avatarImage}" alt="${this.avatarName}">`;
@@ -114,76 +114,76 @@ class AvatarClient {
 
     async connect() {
         try {
-            // 立即开始negotiate，减少延迟
-            // 创建 RTCPeerConnection
+            // Start negotiate immediately to reduce delay
+            // Create RTCPeerConnection
             this.pc = new RTCPeerConnection({
                 sdpSemantics: 'unified-plan',
                 iceServers: []
             });
 
-            // 监听远程视频流
+            // Listen for remote video stream
             this.pc.addEventListener('track', (event) => {
-                console.log('收到远程视频流:', event.track.kind);
+                console.log('Received remote stream:', event.track.kind);
                 if (event.track.kind === 'video') {
                     this.remoteVideo.srcObject = event.streams[0];
                     this.hideLoading();
-                    // 接通后显示所有控制按钮
+                    // Show all control buttons after connected
                     this.showControlButtons();
                 }
             });
 
-            // ICE候选处理
+            // ICE candidate handling
             this.pc.onicecandidate = (event) => {
                 if (event.candidate) {
-                    console.log('ICE候选:', event.candidate);
+                    console.log('ICE candidate:', event.candidate);
                 }
             };
 
-            // 连接状态监听
+            // Connection state monitoring
             this.pc.onconnectionstatechange = () => {
-                console.log('连接状态:', this.pc.connectionState);
+                console.log('Connection state:', this.pc.connectionState);
                 if (this.pc.connectionState === 'connected') {
                     this.isConnected = true;
                     this.hideLoading();
-                    // 接通后显示所有控制按钮
+                    // Show all control buttons after connected
                     this.showControlButtons();
                 } else if (this.pc.connectionState === 'failed') {
-                    this.showError('连接失败，请刷新页面重试');
+                    this.showError('Connection failed, please refresh the page');
                 }
             };
 
-            // 创建数据通道
+            // Create data channel
             this.dataChannel = this.pc.createDataChannel('chat');
             this.setupDataChannel();
 
-            // 参考 client.js 的 negotiate 方法
+            // Negotiate connection
             await this.negotiate();
 
-            console.log('WebRTC连接成功');
+            console.log('WebRTC connection successful');
 
         } catch (error) {
-            console.error('连接失败:', error);
-            this.showError('连接失败: ' + error.message);
+            console.error('Connection failed:', error);
+            this.showError('Connection failed: ' + error.message);
             throw error;
         }
     }
 
     async negotiate() {
         try {
-            // 添加进度提示
-            this.updateLoadingProgress('正在建立连接...');
+            // Update progress
+            this.updateLoadingProgress('Establishing connection...');
             
-            // 添加 transceiver - 参考 client.js
+            // Add transceivers
             this.pc.addTransceiver('video', { direction: 'recvonly' });
             this.pc.addTransceiver('audio', { direction: 'recvonly' });
 
-            // 创建 offer
+            // Create offer
             const offer = await this.pc.createOffer();
             await this.pc.setLocalDescription(offer);
 
-            this.updateLoadingProgress('正在收集信息...');
+            this.updateLoadingProgress('Gathering information...');
             
-            // 等待 ICE gathering 完成
+            // Wait for ICE gathering to complete
             await new Promise((resolve) => {
                 if (this.pc.iceGatheringState === 'complete') {
                     resolve();
@@ -198,12 +198,12 @@ class AvatarClient {
                 }
             });
 
-            this.updateLoadingProgress('正在加载数字人...');
+            this.updateLoadingProgress('Loading AI avatar...');
             
-            // 记录开始时间
+            // Record start time
             const startTime = Date.now();
             
-            // 发送 offer 到服务器
+            // Send offer to server
             const response = await fetch('/offer', {
                 method: 'POST',
                 headers: {
@@ -218,34 +218,34 @@ class AvatarClient {
 
             const answer = await response.json();
             
-            // 记录耗时
+            // Record elapsed time
             const elapsedTime = Date.now() - startTime;
-            console.log(`Offer请求耗时: ${elapsedTime}ms`);
+            console.log(`Offer request took: ${elapsedTime}ms`);
             
             if (elapsedTime > 3000) {
-                console.warn('Offer请求耗时过长，可能是因为后端需要加载avatar模型');
+                console.warn('Offer request took too long, backend may be loading avatar model');
             }
             
-            this.updateLoadingProgress('正在建立视频连接...');
+            this.updateLoadingProgress('Establishing video connection...');
             
-            // 保存sessionid
+            // Save session ID
             this.sessionid = answer.sessionid;
             console.log('Session ID:', this.sessionid);
             
-            // 设置远程描述
+            // Set remote description
             await this.pc.setRemoteDescription(answer);
             
-            this.updateLoadingProgress('等待视频流...');
+            this.updateLoadingProgress('Waiting for video stream...');
         } catch (error) {
-            console.error('Negotiate失败:', error);
-            this.updateLoadingProgress('连接失败');
+            console.error('Negotiate failed:', error);
+            this.updateLoadingProgress('Connection failed');
             throw error;
         }
     }
 
     setupDataChannel() {
         this.dataChannel.onopen = () => {
-            console.log('数据通道已打开');
+            console.log('Data channel opened');
         };
 
         this.dataChannel.onmessage = (event) => {
@@ -253,56 +253,56 @@ class AvatarClient {
                 const data = JSON.parse(event.data);
                 this.handleDataChannelMessage(data);
             } catch (error) {
-                console.error('处理消息失败:', error);
+                console.error('Failed to process message:', error);
             }
         };
 
         this.dataChannel.onerror = (error) => {
-            console.error('数据通道错误:', error);
+            console.error('Data channel error:', error);
         };
 
         this.dataChannel.onclose = () => {
-            console.log('数据通道已关闭');
+            console.log('Data channel closed');
             this.isConnected = false;
         };
     }
 
     handleDataChannelMessage(data) {
-        console.log('收到数据通道消息:', data);
+        console.log('Received data channel message:', data);
 
         switch (data.type) {
             case 'asr':
-                // 语音识别结果
-                console.log('ASR结果:', data.text);
+                // Speech recognition result
+                console.log('ASR result:', data.text);
                 this.showSubtitle(data.text);
-                // 添加到聊天窗口
+                // Add to chat window
                 this.addChatMessage('user', data.text);
                 break;
                 
             case 'llm':
-                // AI回复 - 显示在字幕和聊天窗口
-                console.log('LLM回答:', data.text);
-                // 累积字幕文本（因为LLM是流式返回，按句子分段）
+                // AI response - display in subtitle and chat window
+                console.log('LLM response:', data.text);
+                // Accumulate subtitle text (LLM returns in streaming, split by sentences)
                 this.currentSubtitle = data.text;
                 this.showSubtitle(data.text);
-                // 添加到聊天窗口
+                // Add to chat window
                 this.addChatMessage('assistant', data.text);
                 
-                // 清除之前的定时器
+                // Clear previous timer
                 if (this.subtitleTimer) {
                     clearTimeout(this.subtitleTimer);
                     this.subtitleTimer = null;
                 }
                 
-                // 注意：不在这里设置隐藏定时器，等待 tts_end 事件
+                // Note: Don't set hide timer here, wait for tts_end event
                 break;
                 
             case 'tts_start':
-                // 开始说话
+                // Start speaking
                 this.isSpeaking = true;
-                console.log('数字人开始说话');
+                console.log('Avatar started speaking');
                 
-                // 清除任何现有的隐藏定时器
+                // Clear any existing hide timer
                 if (this.subtitleTimer) {
                     clearTimeout(this.subtitleTimer);
                     this.subtitleTimer = null;
@@ -310,11 +310,11 @@ class AvatarClient {
                 break;
                 
             case 'tts_end':
-                // 结束说话
+                // Finish speaking
                 this.isSpeaking = false;
-                console.log('数字人结束说话');
+                console.log('Avatar finished speaking');
                 
-                // 数字人说完话后，延迟3秒再隐藏字幕
+                // Hide subtitle after 3 seconds when avatar finishes speaking
                 if (this.subtitleTimer) {
                     clearTimeout(this.subtitleTimer);
                 }
@@ -324,27 +324,27 @@ class AvatarClient {
                 break;
                 
             case 'error':
-                // 错误消息
-                console.error('错误:', data.message);
+                // Error message
+                console.error('Error:', data.message);
                 this.showError(data.message);
                 break;
         }
     }
 
-    // 参考index.html的对话模式实现，使用main.py的human函数
+    // Send text message using main.py's human function
     async sendTextMessage(text) {
         if (!text || !text.trim()) return;
 
         try {
-            console.log('发送聊天消息:', text);
+            console.log('Sending chat message:', text);
             
-            // 显示在字幕上
+            // Display in subtitle
             this.showSubtitle(text);
             
-            // 添加到聊天窗口
+            // Add to chat window
             this.addChatMessage('user', text);
             
-            // 使用/human接口，type='chat' - 参考index.html
+            // Use /human endpoint with type='chat'
             const response = await fetch('/human', {
                 method: 'POST',
                 headers: {
@@ -359,21 +359,21 @@ class AvatarClient {
             });
 
             const data = await response.json();
-            console.log('发送成功:', data);
+            console.log('Send successful:', data);
             
-            // LLM回答会通过数据通道返回，在handleDataChannelMessage中处理
+            // LLM response will be returned via data channel, handled in handleDataChannelMessage
 
         } catch (error) {
-            console.error('发送消息失败:', error);
-            this.showError('发送失败，请重试');
+            console.error('Failed to send message:', error);
+            this.showError('Send failed, please try again');
         }
     }
 
-    // 添加聊天消息到窗口
+    // Add chat message to window
     addChatMessage(role, text) {
         const chatMessages = document.getElementById('chatMessages');
         if (!chatMessages) {
-            console.error('chatMessages元素未找到');
+            console.error('chatMessages element not found');
             return;
         }
 
@@ -392,21 +392,21 @@ class AvatarClient {
         messageDiv.appendChild(bubbleDiv);
         chatMessages.appendChild(messageDiv);
         
-        // 滚动到底部
+        // Scroll to bottom
         chatMessages.scrollTop = chatMessages.scrollHeight;
         
-        console.log('添加聊天消息:', role, text);
+        console.log('Added chat message:', role, text);
     }
 
-    // 参考index.html的语音识别实现
+    // Setup speech recognition
     setupSpeechRecognition() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         
         if (SpeechRecognition) {
             this.recognition = new SpeechRecognition();
-            this.recognition.continuous = true; // 持续识别
-            this.recognition.interimResults = true; // 中间结果
-            this.recognition.lang = 'zh-CN';
+            this.recognition.continuous = true; // Continuous recognition
+            this.recognition.interimResults = true; // Interim results
+            this.recognition.lang = 'en-US';
 
             this.recognition.onresult = (event) => {
                 let interimTranscript = '';
@@ -420,51 +420,51 @@ class AvatarClient {
                     }
                 }
                 
-                // 显示中间结果在字幕上
+                // Display interim results in subtitle
                 if (interimTranscript) {
                     this.showSubtitle(interimTranscript);
                 }
                 
-                // 最终结果发送到服务器
+                // Send final result to server
                 if (finalTranscript) {
-                    console.log('语音识别最终结果:', finalTranscript);
+                    console.log('Speech recognition final result:', finalTranscript);
                     this.sendTextMessage(finalTranscript);
                 }
             };
 
             this.recognition.onerror = (event) => {
-                console.error('语音识别错误:', event.error);
+                console.error('Speech recognition error:', event.error);
                 if (event.error !== 'no-speech') {
-                    this.showError('语音识别失败: ' + event.error);
+                    this.showError('Speech recognition failed: ' + event.error);
                 }
             };
 
             this.recognition.onend = () => {
-                console.log('语音识别结束');
+                console.log('Speech recognition ended');
                 this.stopVoiceInput();
             };
         } else {
-            console.warn('浏览器不支持语音识别');
+            console.warn('Browser does not support speech recognition');
         }
     }
 
-    // 参考index.html的按住说话功能
+    // Setup push to talk functionality
     setupPushToTalk() {
-        // 在全屏模式下，使用整个屏幕作为按住说话区域
+        // In fullscreen mode, use entire screen as push to talk area
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         let touchStartTime = 0;
         let recordingTimeout;
         
-        // 为整个文档添加触摸事件
+        // Add touch events to document
         document.addEventListener('touchstart', (e) => {
-            // 避免在点击按钮时触发
+            // Avoid triggering when clicking buttons
             if (e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.closest('.chat-window')) {
                 return;
             }
             
             touchStartTime = Date.now();
             
-            // 延迟启动录音，避免误触
+            // Delay starting recording to avoid accidental triggers
             recordingTimeout = setTimeout(() => {
                 this.startVoiceInput();
             }, 200);
@@ -475,12 +475,12 @@ class AvatarClient {
                 return;
             }
             
-            // 清除延迟启动
+            // Clear delayed start
             if (recordingTimeout) {
                 clearTimeout(recordingTimeout);
             }
             
-            // 检查是否是短按（小于200ms）
+            // Check if it's a short tap (less than 200ms)
             const touchDuration = Date.now() - touchStartTime;
             if (touchDuration < 200 && !this.isRecording) {
                 return;
@@ -491,7 +491,7 @@ class AvatarClient {
             }
         });
         
-        // 桌面端：使用空格键
+        // Desktop: use spacebar
         document.addEventListener('keydown', (e) => {
             if (e.code === 'Space' && !this.isRecording && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
                 e.preventDefault();
@@ -507,18 +507,18 @@ class AvatarClient {
         });
     }
 
-    // 切换语音输入状态（麦克风按钮）
+    // Toggle voice input state (microphone button)
     toggleVoiceInput() {
         if (this.isRecording) {
             this.stopVoiceInput();
-            // 更新按钮状态
+            // Update button state
             const micBtn = document.getElementById('micBtn');
             if (micBtn) {
                 micBtn.classList.remove('recording');
             }
         } else {
             this.startVoiceInput();
-            // 更新按钮状态
+            // Update button state
             const micBtn = document.getElementById('micBtn');
             if (micBtn) {
                 micBtn.classList.add('recording');
@@ -526,7 +526,7 @@ class AvatarClient {
         }
     }
 
-    // 参考index.html的录音实现
+    // Start voice input recording
     async startVoiceInput() {
         if (this.isRecording) return;
         
@@ -549,27 +549,27 @@ class AvatarClient {
             this.mediaRecorder.start();
             this.isRecording = true;
             
-            // 更新麦克风按钮状态
+            // Update microphone button state
             const micBtn = document.getElementById('micBtn');
             if (micBtn) {
                 micBtn.classList.add('recording');
             }
             
-            // 显示录音提示
-            this.showSubtitle('正在录音，松开发送...');
+            // Show recording prompt
+            this.showSubtitle('Recording, release to send...');
             
-            // 启动语音识别
+            // Start speech recognition
             if (this.recognition) {
                 try {
                     this.recognition.start();
                 } catch (error) {
-                    console.error('语音识别启动失败:', error);
+                    console.error('Failed to start speech recognition:', error);
                 }
             }
             
         } catch (error) {
-            console.error('无法访问麦克风:', error);
-            this.showError('无法访问麦克风，请检查浏览器权限设置');
+            console.error('Cannot access microphone:', error);
+            this.showError('Cannot access microphone, please check browser permissions');
         }
     }
 
@@ -578,29 +578,29 @@ class AvatarClient {
         
         this.isRecording = false;
         
-        // 更新麦克风按钮状态
+        // Update microphone button state
         const micBtn = document.getElementById('micBtn');
         if (micBtn) {
             micBtn.classList.remove('recording');
         }
         
-        // 停止录音
+        // Stop recording
         if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
             this.mediaRecorder.stop();
         }
         
-        // 停止语音识别
+        // Stop speech recognition
         if (this.recognition) {
             try {
                 this.recognition.stop();
             } catch (error) {
-                console.error('停止语音识别失败:', error);
+                console.error('Failed to stop speech recognition:', error);
             }
         }
     }
 
     showSubtitle(text) {
-        // 只有在字幕开启时才显示
+        // Only show when subtitles are enabled
         if (this.subtitleEnabled) {
             this.subtitleOverlay.textContent = text;
             this.subtitleOverlay.classList.add('show');
@@ -608,37 +608,37 @@ class AvatarClient {
     }
 
     hideSubtitle() {
-        // 清除定时器
+        // Clear timer
         if (this.subtitleTimer) {
             clearTimeout(this.subtitleTimer);
             this.subtitleTimer = null;
         }
         
-        // 延迟隐藏，确保过渡动画
+        // Delay hide for transition animation
         setTimeout(() => {
             this.subtitleOverlay.classList.remove('show');
         }, 100);
     }
 
-    // 切换字幕显示状态
+    // Toggle subtitle display state
     toggleSubtitle() {
         this.subtitleEnabled = !this.subtitleEnabled;
-        console.log('字幕状态:', this.subtitleEnabled ? '开启' : '关闭');
+        console.log('Subtitle state:', this.subtitleEnabled ? 'on' : 'off');
         
-        // 如果关闭字幕，立即隐藏当前显示的字幕
+        // If subtitles are disabled, immediately hide current subtitle
         if (!this.subtitleEnabled) {
             this.subtitleOverlay.classList.remove('show');
         }
     }
 
-    // 隐藏控制按钮（calling状态）
+    // Hide control buttons (calling state)
     hideControlButtons() {
         document.getElementById('subtitleBtn').classList.add('hidden');
         document.getElementById('micBtn').classList.add('hidden');
         document.getElementById('chatToggleBtn').classList.add('hidden');
     }
 
-    // 显示控制按钮（接通后）
+    // Show control buttons (after connected)
     showControlButtons() {
         document.getElementById('subtitleBtn').classList.remove('hidden');
         document.getElementById('micBtn').classList.remove('hidden');
@@ -655,18 +655,18 @@ class AvatarClient {
     }
 
     disconnect() {
-        // 停止语音识别
+        // Stop voice input
         this.stopVoiceInput();
 
-        // 关闭数据通道
+        // Close data channel
         if (this.dataChannel) {
             this.dataChannel.close();
             this.dataChannel = null;
         }
 
-        // 关闭 PeerConnection
+        // Close PeerConnection
         if (this.pc) {
-            // 延迟关闭以确保清理完成
+            // Delay close to ensure cleanup completes
             setTimeout(() => {
                 if (this.pc) {
                     this.pc.close();
@@ -679,28 +679,28 @@ class AvatarClient {
     }
 }
 
-// 全局实例
+// Global instance
 let avatarClient;
 
-// 立即初始化，不等待DOMContentLoaded
+// Initialize immediately, don't wait for DOMContentLoaded
 (function initClient() {
-    // 检查DOM是否已加载
+    // Check if DOM is loaded
     if (document.readyState === 'loading') {
-        // DOM未加载，等待DOMContentLoaded
+        // DOM not loaded, wait for DOMContentLoaded
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOMContentLoaded - 初始化客户端');
+            console.log('DOMContentLoaded - Initializing client');
             avatarClient = new AvatarClient();
             window.avatarClient = avatarClient;
         });
     } else {
-        // DOM已加载，立即初始化
-        console.log('DOM已就绪 - 立即初始化客户端');
+        // DOM loaded, initialize immediately
+        console.log('DOM ready - Initializing client immediately');
         avatarClient = new AvatarClient();
         window.avatarClient = avatarClient;
     }
 })();
 
-// 页面关闭时断开连接
+// Disconnect when page closes
 window.onunload = function(event) {
     if (avatarClient && avatarClient.pc) {
         avatarClient.pc.close();
