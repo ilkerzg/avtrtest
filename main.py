@@ -160,7 +160,22 @@ async def offer(request):
         iceServers=[
             RTCIceServer(urls=["stun:stun.l.google.com:19302"]),
             RTCIceServer(urls=["stun:stun1.l.google.com:19302"]),
-            RTCIceServer(urls=["stun:stun2.l.google.com:19302"]),
+            # TURN servers for NAT traversal when direct connection fails
+            RTCIceServer(
+                urls=["turn:openrelay.metered.ca:80"],
+                username="openrelayproject",
+                credential="openrelayproject"
+            ),
+            RTCIceServer(
+                urls=["turn:openrelay.metered.ca:443"],
+                username="openrelayproject",
+                credential="openrelayproject"
+            ),
+            RTCIceServer(
+                urls=["turn:openrelay.metered.ca:443?transport=tcp"],
+                username="openrelayproject",
+                credential="openrelayproject"
+            ),
         ],
     ))
     pcs.add(pc)
@@ -177,6 +192,14 @@ async def offer(request):
             pcs.discard(pc)
             if sessionid in nerfreals:
                 del nerfreals[sessionid]
+    
+    @pc.on("iceconnectionstatechange")
+    async def on_iceconnectionstatechange():
+        logger.info(f"ICE connection state: {pc.iceConnectionState}  sessionid={sessionid}")
+    
+    @pc.on("icegatheringstatechange")
+    async def on_icegatheringstatechange():
+        logger.info(f"ICE gathering state: {pc.iceGatheringState}  sessionid={sessionid}")
     
     @pc.on("datachannel")
     def on_datachannel(channel):

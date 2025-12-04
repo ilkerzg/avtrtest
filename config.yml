@@ -16,6 +16,17 @@ FAL:
   # LLM Configuration (if using fal.ai LLM)
   FAL_LLM_MODEL: "google/gemini-2.5-flash"  # Options: anthropic/claude-3.5-sonnet, openai/gpt-4o, deepseek/deepseek-r1, etc.
 
+# WebRTC Configuration (TURN servers for NAT traversal)
+WEBRTC:
+  # Free public TURN server (for testing/development)
+  TURN_SERVER: "turn:openrelay.metered.ca:443"
+  TURN_USERNAME: "openrelayproject"
+  TURN_PASSWORD: "openrelayproject"
+  # For production, consider using:
+  # - Metered TURN: https://www.metered.ca/stun-turn (free tier available)
+  # - Twilio TURN: https://www.twilio.com/docs/stun-turn
+  # - Xirsys: https://xirsys.com/
+
 DOWNLOAD:
   BASE_URL: "https://huggingface.co/shibing624/ai-avatar-wav2lip/resolve/main"
   
