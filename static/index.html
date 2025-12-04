@@ -3,312 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Avatar - Digital Human Chat System</title>
-    
+    <title>Fal AI Avatar Demo</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 
-                         'Microsoft YaHei', sans-serif;
-            background: #fafafa;
-            color: #1a1a1a;
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #0a0a0a;
+            color: #fff;
             min-height: 100vh;
         }
 
-        /* 主要内容区 */
-        .main-content {
-            max-width: 1200px;
+        .container {
+            max-width: 1100px;
             margin: 0 auto;
-            padding: 4rem 2rem;
+            padding: 3rem 1.5rem;
         }
 
-        /* 标题区 */
-        .hero-section {
+        .header {
             text-align: center;
-            margin-bottom: 4rem;
+            margin-bottom: 3rem;
         }
 
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: 800;
-            line-height: 1.2;
-            margin-bottom: 1.5rem;
-            color: #1a1a1a;
-        }
-
-        .hero-subtitle {
-            font-size: 1.2rem;
-            color: #666;
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        /* 数字人卡片网格 */
-        .avatars-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-
-        /* 数字人卡片 */
-        .avatar-card {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: box-shadow 0.2s ease;
-            cursor: pointer;
-            border: 1px solid #e5e5e5;
-        }
-
-        .avatar-card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        .avatar-card-header {
-            padding: 1.5rem 1.5rem 1rem;
-            background: #f8f8ff;
-        }
-
-        .avatar-card-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: #1a1a1a;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .avatar-card-arrow {
-            width: 28px;
-            height: 28px;
-            background: #f5f5f5;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s;
-        }
-
-        .avatar-card:hover .avatar-card-arrow {
-            background: #7c3aed;
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
             color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
         }
 
-        .avatar-card-description {
-            font-size: 0.9rem;
-            color: #888;
-            line-height: 1.5;
-            margin-bottom: 0.5rem;
-            display: -webkit-box;
-            -webkit-line-clamp: 1;
-            -webkit-box-orient: vertical;
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(to right, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: #71717a;
+            font-size: 1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 12px;
             overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .avatar-image-wrapper {
-            width: 100%;
-            aspect-ratio: 9/16; /* 竖向比例，适配数字人形象 */
-            overflow: hidden;
-            position: relative;
+        .card:hover {
+            border-color: #6366f1;
+            transform: translateY(-2px);
         }
 
-        .avatar-image {
+        .card-content {
+            padding: 1.25rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-desc {
+            color: #71717a;
+            font-size: 0.85rem;
+        }
+
+        .card-image {
             width: 100%;
-            height: 100%;
+            aspect-ratio: 3/4;
             object-fit: cover;
-            background: #f0f0f0;
-        }
-        
-        .avatar-image.loading {
-            opacity: 0.3;
-        }
-        
-        .avatar-image.loaded {
-            opacity: 1;
+            background: #27272a;
         }
 
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .navbar {
-                padding: 1rem;
-            }
-
-            .navbar-menu {
-                display: none;
-            }
-
-            .hero-title {
-                font-size: 2rem;
-            }
-
-            .hero-subtitle {
-                font-size: 1rem;
-            }
-
-            .avatars-grid {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-
-            .main-content {
-                padding: 2rem 1rem;
-            }
+        .powered {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #27272a;
         }
 
-        /* 加载动画 */
+        .powered-text {
+            color: #52525b;
+            font-size: 0.8rem;
+        }
+
+        .powered-text a {
+            color: #8b5cf6;
+            text-decoration: none;
+        }
+
         .loading {
             text-align: center;
-            padding: 3rem;
-            color: #666;
+            padding: 4rem;
+            color: #71717a;
         }
 
-        .loading-spinner {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f0f0f0;
-            border-top-color: #7c3aed;
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #27272a;
+            border-top-color: #6366f1;
             border-radius: 50%;
             animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
+        @media (max-width: 640px) {
+            .title { font-size: 1.75rem; }
+            .grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
-    <!-- 主要内容 -->
-    <main class="main-content">
-        <!-- 标题区 -->
-        <section class="hero-section">
-            <h1 class="hero-title">Interactive AI avatar for<br>every role in life</h1>
-            <p class="hero-subtitle">
-                One platform, countless roles — AI avatars that work, teach, guide, and care.
-            </p>
-        </section>
+    <div class="container">
+        <header class="header">
+            <span class="badge">FAL.AI DEMO</span>
+            <h1 class="title">AI Avatar Chat</h1>
+            <p class="subtitle">Real-time lip-sync avatars powered by Fal.ai</p>
+        </header>
 
-        <!-- 数字人卡片网格 -->
-        <div id="avatarsGrid" class="avatars-grid">
-            <!-- 加载中 -->
-            <div class="loading" style="grid-column: 1/-1;">
-                <div class="loading-spinner"></div>
-                <p style="margin-top: 1rem;">Loading avatars...</p>
+        <div id="grid" class="grid">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading avatars...</p>
             </div>
         </div>
-    </main>
+
+        <footer class="powered">
+            <p class="powered-text">
+                Powered by <a href="https://fal.ai" target="_blank">fal.ai</a> — 
+                TTS: Kokoro | LLM: Gemini | Lip-sync: Wav2Lip
+            </p>
+        </footer>
+    </div>
 
     <script>
-        // Load avatar list from backend
-        let avatars = [];
-        
         async function loadAvatars() {
             try {
-                const response = await fetch('/api/avatars');
-                const result = await response.json();
-                
-                if (result.code === 0 && result.data) {
-                    avatars = result.data;
-                    renderAvatars();
-                } else {
-                    console.error('Failed to load avatar list:', result);
-                    showError('Failed to load avatars');
-                }
-            } catch (error) {
-                console.error('Error loading avatar list:', error);
-                showError('Failed to connect to server');
+                const res = await fetch('/api/avatars');
+                const data = await res.json();
+                if (data.code === 0) renderAvatars(data.data);
+            } catch (e) {
+                document.getElementById('grid').innerHTML = 
+                    '<div class="loading"><p>Failed to load. <a href="/" style="color:#8b5cf6">Retry</a></p></div>';
             }
         }
-        
-        function renderAvatars() {
-            const grid = document.getElementById('avatarsGrid');
-            grid.innerHTML = '';
-            
-            avatars.forEach(avatar => {
-                const card = document.createElement('div');
-                card.className = 'avatar-card';
-                card.onclick = () => openAvatarChat(avatar.id, avatar.name);
-                
-                // 使用实际图片，如果不存在则使用占位图
-                const imageSrc = avatar.image || `https://picsum.photos/seed/${avatar.id}/600/400`;
-                
-                card.innerHTML = `
-                    <div class="avatar-card-header">
-                        <div class="avatar-card-title">
-                            ${avatar.role || avatar.name}
-                            <span class="avatar-card-arrow">
-                                <i class="bi bi-arrow-right"></i>
-                            </span>
-                        </div>
-                        <div class="avatar-card-description">
-                            ${avatar.subtitle || avatar.description}
-                        </div>
+
+        function renderAvatars(avatars) {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = avatars.map(a => `
+                <div class="card" onclick="location.href='talk.html?avatar=${a.id}'">
+                    <img src="${a.image}" alt="${a.name}" class="card-image" 
+                         onerror="this.style.display='none'">
+                    <div class="card-content">
+                        <div class="card-title">${a.name}</div>
+                        <div class="card-desc">${a.description}</div>
                     </div>
-                    <div class="avatar-image-wrapper">
-                        <img src="${imageSrc}" 
-                             alt="${avatar.name}" 
-                             class="avatar-image loading"
-                             loading="eager"
-                             onerror="this.onerror=null; this.src='https://picsum.photos/seed/${avatar.id}/600/400';">
-                    </div>
-                `;
-                
-                grid.appendChild(card);
-                
-                // 图片加载完成后移除loading类
-                const img = card.querySelector('.avatar-image');
-                if (img) {
-                    // 如果图片已经加载（来自缓存）
-                    if (img.complete) {
-                        img.classList.remove('loading');
-                        img.classList.add('loaded');
-                    } else {
-                        // 监听图片加载完成事件
-                        img.addEventListener('load', function() {
-                            this.classList.remove('loading');
-                            this.classList.add('loaded');
-                        });
-                    }
-                }
-            });
-        }
-        
-        function showError(message) {
-            const grid = document.getElementById('avatarsGrid');
-            grid.innerHTML = `
-                <div class="loading" style="grid-column: 1/-1;">
-                    <i class="bi bi-exclamation-circle" style="font-size: 3rem; color: #dc3545;"></i>
-                    <p style="margin-top: 1rem; color: #dc3545;">${message}</p>
-                    <button onclick="loadAvatars()" class="btn-dashboard" style="margin-top: 1rem;">
-                        Retry
-                    </button>
                 </div>
-            `;
+            `).join('');
         }
-        
-        function openAvatarChat(avatarId, avatarName) {
-            // Pass avatar parameter only
-            const url = `talk.html?avatar=${avatarId}`;
-            console.log('Navigating to chat page:', url);
-            window.location.href = url;
-        }
-        
-        // Page load
-        document.addEventListener('DOMContentLoaded', () => {
-            loadAvatars();
-        });
+
+        loadAvatars();
     </script>
 </body>
 </html>
